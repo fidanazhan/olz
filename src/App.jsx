@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './auth/Login'; 
 import Layout from './components/Layout';  
 import Home from './pages/Home';     
-import StationRegister from './pages/StationRegister';  
+import StationManagement from './pages/StationManagement';  
+import UserManagement from './pages/UserManagement'
 import ProtectedRoute from './util/ProtectedRoute';
 
 function App() {
@@ -20,13 +21,13 @@ function App() {
           <Route path="station-management" element=
             {
               <ProtectedRoute>
-                <StationRegister />
+                <StationManagement />
               </ProtectedRoute>
             }></Route>
           <Route path="user-management" element=
             {
               <ProtectedRoute>
-                <StationRegister />
+                <UserManagement />
               </ProtectedRoute>
             }></Route>
         </Route>

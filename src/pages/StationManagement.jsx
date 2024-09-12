@@ -3,9 +3,9 @@ import StationListing from '../components/Station/StationListing';
 import { HiMagnifyingGlass } from "react-icons/hi2";
 
 
-const StationRegister = () => {
+const StationManagement = () => {
     return(
-        <div className="px-4 lg:px-6 py-2">
+        <div className="px-4 lg:px-14 py-2">
             <div className="py-4 bg-white px-6 rounded-md flex justify-between">
                 <span className="font-bold text-3xl">Station Management</span>
                 <div className="relative">
@@ -27,4 +27,4 @@ const StationRegister = () => {
     )
 }
 
-export default StationRegister;
+export default StationManagement;

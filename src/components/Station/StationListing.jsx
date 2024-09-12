@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import OilTank from './OilTank.jsx';
 
 import ClipLoader from 'react-spinners/ClipLoader'; // Importing a spinner
 import { fetchStationListData, fetchStationSpecificData } from './API.jsx'
+import { GiGasPump, GiFuelTank } from "react-icons/gi";
+import { RiBuildingLine } from "react-icons/ri";
+import ModalStation from './ModalStation.jsx';
+import ModalTank from './ModalTank.jsx';
 
 const StationListing = () => {
 
@@ -14,24 +17,39 @@ const StationListing = () => {
 
   // useState for Loading Animation
   const [listLoading, setListLoading] = useState(true);
-  const [detailsLoading, setDetailsLoading] = useState(false);
 
   // useState for handle click button
-  const [modalOpen, setModalOpen] = useState(false);
-  const [activeBox, setActiveBox] = useState(null);
+  const [modalOpen, setModalOpen] = useState(null);
 
   // useState for fetching data from the API
   const [boxes, setBoxes] = useState([]);
-  const [boxDetails, setBoxDetails] = useState(null);
 
   // useState for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
+  const [selectedId, setSelectedId] = useState(null);
+  const [isModalStationOpen, setModalStationOpen] = useState(false);
+  const [isModalTankOpen, setModalTankOpen] = useState(false);
 
+  const openModalStation = (id) => {
+    setSelectedId(id);
+    setModalStationOpen(true);
+  };
 
-  const toggleModal = () => {
-    setModalOpen(!modalOpen);
+  const closeModalStation = () => {
+    setModalStationOpen(false);
+    setSelectedId(null);
+  };
+
+    const openModalTank = (id) => {
+    setSelectedId(id);
+    setModalTankOpen(true);
+  };
+
+  const closeModalTank = () => {
+    setModalTankOpen(false);
+    setSelectedId(null);
   };
 
 
@@ -76,6 +94,7 @@ const StationListing = () => {
     
   };
 
+  // Fetch more data for station listing when user click 'Load More'
   const handleLoadMoreClick = () => {
     setIsFetching(true);
     if (isFetching || !hasMore) return; 
@@ -122,20 +141,51 @@ const StationListing = () => {
     <div className="mt-4 py-2 flex gap-4">
       
         {/* Left side: List of boxes, scrollable */}
-        <div className="w-full lg:w-4/12 h-screen overflow-y-scroll scrollbar-none flex flex-col gap-2">
+        <div className="w-full h-screen overflow-y-scroll scrollbar-none flex flex-col gap-2">
           {listLoading  && <p>Loading...</p>} {/* Display loading state */}
           {error && <p>Error: {error}</p>} {/* Display error if any */}
           {!listLoading && !listError && boxes.map((box) => (
-            <button
+            <div
               key={box.id}
-              onClick={() => handleSelectedDataClick(box)}
-              className={`cursor-pointer text-left bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ${
-                activeBox?.id === box.id ? 'border-2 border-blue-500' : ''
-              }`}
+              className={`flex text-left bg-white p-3 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200`}
             >
-              <h2 className="text-md font-bold mb-1">{box.siteName}</h2>  {/* Or any other valid field */}
-              <span className="text-gray-700">{box.city}</span>, <span className="text-gray-700">{box.state}</span>
-            </button>
+              <div className="w-52 h-48 bg-gray-200 rounded-md overflow-hidden">
+                <img src={box.imageUrl} alt="Site" className="object-cover w-full h-full" /> {/* Placeholder for image */}
+              </div>
+              <div className='p-4 flex justify-between items-start w-full'>
+                <div className=''>
+                  <h2 className="text-xl font-bold mb-1">{box.siteName}</h2>
+                  <p className="text-gray-700">{box.address}</p> 
+                  <p className="text-gray-700">{box.city}, {box.state}, {box.country}</p>
+                  <div className='inline-block text-sm text-white bg-blue-200 px-2 py-1 font-semibold rounded-md'>{box.status}</div>
+                </div>
+                <div className='space-y-2 mr-10'>
+                <button className="px-4 py-2 w-32 bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-500 text-white rounded-md border-2 border-red-200 flex gap-2 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out"
+                  onClick={() => openModalStation(box.id)}
+                >
+                  <RiBuildingLine className="w-5 h-5" />
+                  <span className="pl-2 border-l-2 border-red-400">Station</span>
+                </button>
+
+                <button className="px-4 py-2 w-32 bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500 text-white rounded-md border-2 border-green-200 flex gap-2 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out"
+                  onClick={() => openModalTank(box.id)}
+                >
+                  <GiFuelTank className="w-5 h-5" />
+                  <span className="pl-2 border-l-2 border-green-400  w-10">Tank</span>
+                </button>
+
+                <button className="px-4 py-2 w-32 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white rounded-md border-2 border-blue-200 flex gap-2 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out">
+                  <GiGasPump className="w-5 h-5" />
+                  <span className="pl-2 border-l-2 border-blue-400  w-10">Pump</span>
+                </button>
+
+
+
+                  
+                </div>
+
+              </div>
+            </div>
           ))}
 
           
@@ -153,62 +203,14 @@ const StationListing = () => {
                 </button>
               )
           }
+
+          {/* Modals */}
+          <ModalStation id={selectedId} isOpen={isModalStationOpen} onClose={closeModalStation} />
+          <ModalTank stationId={selectedId} isOpen={isModalTankOpen} onClose={closeModalTank} />
+
+          
         </div>
 
-        {/* Right side: Active box content, static */}
-        <div className="relative hidden lg:flex lg:flex-col lg:w-8/12 bg-white p-6 rounded-lg shadow-md lg:min-h-[100px]">
-          {activeBox ? (
-            <>
-              <h2 className="text-2xl font-bold mb-2">{activeBox.siteName}</h2>
-              <p className="text-gray-700"><span>{activeBox.city}</span>, <span>{activeBox.state}</span></p>
-
-              {/* Show loading spinner while data is being fetched */}
-              {detailsLoading ? (
-                <div className="flex justify-center items-center h-20">
-                  <ClipLoader size={35} color={"#3498db"} /> {/* Circular spinner */}
-                </div>
-              ) : boxDetails ? (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold">Station Data</h3>
-                  <p className="text-gray-600">Site: {boxDetails.siteName}</p>
-                  <p className="text-gray-600">Site Id: {boxDetails.siteId}</p>
-                  <p className="text-gray-600">Address: 
-                    <span> {boxDetails.address}</span>
-                    <span>,</span>
-                    <span> {boxDetails.city}</span>
-                    <span> {boxDetails.state}</span>
-                    <span> {boxDetails.country}</span>
-                  </p>
-                  <br />
-                  <h3 className="text-lg font-semibold mb-5">Tank</h3>
-                  <div className="tanks-container">
-                    {boxDetails.tankListDTO.map(tank => (
-                      <OilTank
-                        key={tank.id}
-                        tankNumber={tank.tankNumber}
-                        capacity={tank.capacity}
-                        productId={tank.productId}
-                        initialLevel={(tank.capacity * 80) / 100} // Example fill level
-                      />
-                    ))}
-                  </div>
-
-                </div>
-              ) : null}
-
-            </>
-          ) : (
-            <p className="text-gray-500">Select a box to see details</p>
-          )}
-
-          {/* Button at the bottom right */}
-          <button
-            className="absolute bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600 text-sm"
-            onClick={toggleModal}
-          >
-            Update
-          </button>
-        </div>
       </div>
   );
 };
