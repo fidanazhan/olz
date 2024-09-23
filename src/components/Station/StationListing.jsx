@@ -7,7 +7,7 @@ import { RiBuildingLine } from "react-icons/ri";
 import ModalStation from './ModalStation.jsx';
 import ModalTank from './ModalTank.jsx';
 
-const StationListing = () => {
+const StationListing = ({searchTerm}) => {
 
 
   // State to track the active box
@@ -26,7 +26,7 @@ const StationListing = () => {
 
   // useState for pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
 
   const [selectedId, setSelectedId] = useState(null);
   const [isModalStationOpen, setModalStationOpen] = useState(false);
@@ -52,18 +52,17 @@ const StationListing = () => {
     setSelectedId(null);
   };
 
-
-
-  const fetchData = async (pageNumber) => {
+  const fetchData = async (searchTerm, pageNumber) => {
     try {
       setIsFetching(true);
-      const result = await fetchStationListData(pageNumber);
+      const result = await fetchStationListData(searchTerm, pageNumber);
+      
       const reqRes = result.specificDTO.data;
       const last = result.specificDTO.last;      
 
       if (Array.isArray(reqRes)) {
         setBoxes((prevBoxes) => [...prevBoxes, ...reqRes]); 
-        if (last === true) setHasMore(false); 
+        if (last === false) setHasMore(true); 
       } else {
         throw new Error('Invalid data format: Expected an array');
       }
@@ -74,7 +73,6 @@ const StationListing = () => {
     }
   };
 
-  
 
   const handleSelectedDataClick = async  (box) => {
     setActiveBox(box);
@@ -99,7 +97,7 @@ const StationListing = () => {
     setIsFetching(true);
     if (isFetching || !hasMore) return; 
     setCurrentPage((prevPage) => prevPage + 1); 
-    fetchData(currentPage + 1);
+    fetchData(searchTerm, currentPage + 1);
     setIsFetching(false)
 
   };
@@ -110,32 +108,28 @@ const StationListing = () => {
     const fetchDataOnMount = async () => {
       try {
         setListLoading(true); 
-        const result = await fetchStationListData(1);
         
+        const result = await fetchStationListData(searchTerm, 1);
         const reqRes = result.specificDTO.data;
+        const last = result.specificDTO.last;   
 
         if (Array.isArray(reqRes)) {
           setBoxes(reqRes); // Set the boxes state if it's an array
+          if (last === false) setHasMore(true); 
+
         } else {
           throw new Error('Invalid data format: Expected an array');
         }
       } catch (err) {
         setListError(err.message);
+        throw new Error(err.message);
       } finally {
         setListLoading(false); 
       }
     };
 
     fetchDataOnMount(); 
-  }, []);
-
-
-
-
-
-
-
-
+  }, [searchTerm]);
 
   return (
     <div className="mt-4 py-2 flex gap-4">
@@ -190,18 +184,24 @@ const StationListing = () => {
 
           
           {/* Load more button at the bottom */}
-          { hasMore ? 
-              (<button
-                onClick={handleLoadMoreClick}
-                disabled={isFetching} // Disable button when fetching more data
-                className="mt-1 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300"
-              >
-                {isFetching ? 'Loading...' : 'Load More'}
-              </button> ) : (
+          { !hasMore ? 
+              (
                 <button  className="mt-1 p-2 disabled:bg-gray-300 text-black rounded-lg border border-gray-300 hover:bg-gray-100 hover:border-gray-500 transition-colors delay-[80ms]">
                   No more data to load
                 </button>
               )
+              : 
+              (
+                <button
+                  onClick={handleLoadMoreClick}
+                  disabled={isFetching} // Disable button when fetching more data
+                  className="mt-1 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300"
+                >
+                  {isFetching ? 'Loading...' : 'Load More'}
+                </button> 
+              )
+              
+              
           }
 
           {/* Modals */}

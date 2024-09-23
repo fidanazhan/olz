@@ -14,22 +14,24 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element=
             {
-              <ProtectedRoute>
+              <ProtectedRoute requiredRoles={["*"]}>
                 <Home />
               </ProtectedRoute>
             } />
           <Route path="station-management" element=
             {
-              <ProtectedRoute>
+              <ProtectedRoute requiredRoles={["ROLE_SUPER_OP", "ROLE_SUPER_OWN","ROLE_OP","ROLE_OWN"]}>
                 <StationManagement />
               </ProtectedRoute>
-            }></Route>
+            }>  
+          </Route>
           <Route path="user-management" element=
             {
-              <ProtectedRoute>
+              <ProtectedRoute requiredRoles={["ROLE_SUPER_OP", "ROLE_SUPER_OWN"]}>
                 <UserManagement />
               </ProtectedRoute>
-            }></Route>
+            }>
+            </Route>
         </Route>
       </Routes>
     </Router>

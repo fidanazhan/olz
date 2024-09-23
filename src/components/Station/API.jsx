@@ -1,17 +1,24 @@
+import { configAPI, configEndpoint } from "../../api/API";
 
 
-export const fetchStationListData = async (page) => {
+export const fetchStationListData = async (searchTerm, page) => {
+
 
   const token = localStorage.getItem('token');  
 
-  const response = await fetch('http://localhost:8081/api/station/getStations?searchTerm=bangi&page=' + page + '&size=2', {
-    method: 'GET', 
+  const bodyData = {
+    ownerId: 1
+  };
+
+  const response = await fetch( configAPI.apiURL + configEndpoint.getListStations + '?searchTerm=' + searchTerm, {
+    method: 'POST', 
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}` 
-    }
-  });  
-
+    },
+    body: JSON.stringify(bodyData)
+  });
+  
   if (!response.ok) {
     throw new Error('Failed to fetch list data');
   }
@@ -25,7 +32,7 @@ export const fetchStationSpecificData = async (id) => {
 
   const token = localStorage.getItem('token');  
 
-  const response = await fetch('http://localhost:8081/api/station/' + id, {
+  const response = await fetch(configAPI.apiURL + configEndpoint.getSpecificStation +  '/' + id, {
     method: 'GET', 
     headers: {
       'Content-Type': 'application/json',
@@ -40,11 +47,11 @@ export const fetchStationSpecificData = async (id) => {
   return await response.json();
 };
 
-export const fetchTanksBasedOnStation = async(id) => {
+export const fetchTanksBasedOnStation = async(stationId) => {
 
   const token = localStorage.getItem('token');
 
-  const response = await fetch('http://localhost:8081/api/tank/getTanks/' + id, {
+  const response = await fetch(configAPI.apiURL + configEndpoint.getListTanksBasedOnStationId + "/" + stationId, {
     method: 'GET',
     headers: {
       'Content-type': 'application/json',
@@ -60,10 +67,12 @@ export const fetchTanksBasedOnStation = async(id) => {
 
 }
 
-export const fetchTanksDataBasedOnStation = async (stationId) => {
+export const fetchTanksDataBasedOnStation = async (searchTerm, stationId) => {
+
+
   const token = localStorage.getItem('token');  
 
-  const response = await fetch('http://localhost:8081/api/tank/getTanks/' + stationId, {
+  const response = await fetch(configAPI.apiURL + configEndpoint.getListTanksBasedOnStationId + '/' + stationId, {
     method: 'GET', 
     headers: {
       'Content-Type': 'application/json',
@@ -81,7 +90,7 @@ export const fetchTanksDataBasedOnStation = async (stationId) => {
 export const fetchSpecificTankData = async (tankId) => {
   const token = localStorage.getItem('token');  
 
-  const response = await fetch('http://localhost:8081/api/tank/' + tankId, {
+  const response = await fetch(configAPI.apiURL + configEndpoint.getSpecificTank + "/" + tankId, {
     method: 'GET', 
     headers: {
       'Content-Type': 'application/json',

@@ -1,7 +1,8 @@
 import { Navigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { getRolesFromToken } from '../util/Auth'
 
-const isTokenExpired = (token) => {
+export const isTokenExpired = (token) => {
   try {
     const decodedToken = jwtDecode(token);
     const currentTime = Date.now() / 1000; 
@@ -12,14 +13,23 @@ const isTokenExpired = (token) => {
   }
 };
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, requiredRoles }) => {
   const token = localStorage.getItem('token');
-
-  console.log("Token (1) : " + token)
-
   
   if (!token || isTokenExpired(token)) {
     return <Navigate to="/login" />;
+  }
+
+  const roles = getRolesFromToken(token);
+
+  if (requiredRoles.includes("*")) {
+    return children;
+  }
+
+  const hasRequiredRole = requiredRoles.some((role) => roles.includes(role));
+
+  if (!hasRequiredRole) {
+    return <Navigate to="/not-authorized" />;
   }
 
   return children;

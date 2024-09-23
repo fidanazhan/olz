@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { configAPI, configEndpoint } from '../../api/API';
 
 const ModalStation = ({ id, isOpen, onClose }) => {
     const modalRef = useRef();
@@ -64,7 +65,7 @@ const ModalStation = ({ id, isOpen, onClose }) => {
   const fetchDetailData = async (id) => {
     const token = localStorage.getItem('token');  
 
-    const response = await fetch('http://localhost:8081/api/station/' + id, {
+    const response = await fetch(configAPI.apiURL + configEndpoint.getSpecificStation + '/' + id, {
       method: 'GET', 
       headers: {
         'Content-Type': 'application/json',
